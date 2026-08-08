@@ -1,0 +1,17 @@
+=========================================
+INTRACAPITAL SAMPLE COMPANY: LOGISTICS AND ROUTE OPERATIONS REPORT
+=========================================
+Reporting Period: Q2 2026
+
+1. ROUTE ANALYSIS & DELAYS
+Analysis of our primary distribution routes shows systemic bottlenecks along the Eastern Seaboard (Route I-95 corridor near Richmond, VA) and the Midwest Hub (Chicago Sector).
+
+- Shipment SH-1051: Delayed 18 hours due to an unexpected severe storm and associated flash flooding near Richmond, VA, combined with high traffic congestion. The refrigerated unit ran on battery backup for 12 hours while stationary.
+- Shipment SH-1066: Suffered a 22-hour delay due to customs clearance gridlock and port terminal congestion.
+- Shipment SH-1112: Rerouted through a high-heat urban zone due to road construction on Route 70. The reroute took an additional 6 hours. During this period, the driver noted that the secondary refrigeration compressor (Unit Ref-B2) was struggling to maintain negative temperatures due to extreme ambient humidity.
+
+2. COMPRESSOR & COOLING HARDWARE LOGS
+- Container C-801 (carrying SH-1112): Compressor Unit Ref-B2 reported secondary loop pressure drops. Refrigeration failed intermittently during the Route 70 construction detour.
+- Container C-502 (carrying SH-1082): Temperature logs indicate a sensor calibration drift. The driver dashboard reported 4°C, but the rear compartment was likely warmer.
+- Container C-604 (carrying SH-1104): Experienced power fluctuation in the auxiliary generator during the layover at Richmond Terminal.
+- Warehouse WH-101: The primary cooling compressor (Comp-A) exhibited severe motor housing temperature spikes, reaching 85°C (normal: 50-60°C). We observed increased vibration levels, but lacked sensor tools to quantify the exact frequency spectrum. Compressor Comp-A ultimately seized on July 14, causing a partial warehouse thermal excursion.

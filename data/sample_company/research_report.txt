@@ -1,0 +1,21 @@
+=========================================
+INTRACAPITAL SAMPLE COMPANY: INTERNAL RESEARCH & DEVELOPMENT REPORT
+=========================================
+Document Ref: RD-2025-99
+Title: Predictive Modeling of Shelf-Life and Product Degradation via Thermal Stress Integrals
+Authors: Dr. Helena Vance, R&D Lead
+
+Executive Summary:
+This research outlines a methodology for predicting organic product shelf-life and chemical integrity by calculating thermal stress integrals. Standard logistics monitoring relies on aggregate container data, which masks local hot spots (pallet microclimates). By deploying dense wireless sensor networks at the pallet level, we can capture micro-fluctuations.
+Using our proprietary thermal stress model:
+Degradation Factor (D) = Integral from t0 to t1 of e^(beta * (T(t) - T_base)) dt
+we can calculate the exact remaining shelf-life of perishables in real-time. For organic berries (strawberries), the acceleration factor (beta) is 0.18, meaning a 2°C local temperature rise triples the rate of spoilage. If applied to real-time telemetry, this model can trigger rerouting or notify distributors of compromised cargo before it reaches the customer.
+
+-----------------------------------------
+
+Document Ref: RD-2025-102
+Title: Machine Learning models for Predictive Maintenance of Rotary Compressor Units
+Authors: Engineering Labs
+
+Executive Summary:
+This paper documents the training of an algorithm that detects mechanical wear on rotary compressors using high-frequency vibration and motor winding temperature data. We found that anomalous micro-vibrations in the 12 kHz to 15 kHz spectrum precede mechanical failure (specifically bearing seizure) by 7 to 10 days. By combining this vibration telemetry with winding temperature measurements, we can predict compressor breakdown with 92% accuracy, allowing maintenance to be scheduled proactively and preventing catastrophic thermal failure of cargo refrigeration systems.

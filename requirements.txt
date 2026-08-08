@@ -1,0 +1,12 @@
+streamlit
+pandas
+plotly
+pypdf
+chromadb
+sentence-transformers
+python-dotenv
+ibm-watsonx-ai
+pytest
+fastapi
+uvicorn
+httpx

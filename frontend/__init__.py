@@ -1,0 +1,1 @@
+# INTRACAPITAL Frontend package init

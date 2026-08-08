@@ -1,0 +1,27 @@
+# Python virtual environment
+.venv/
+venv/
+ENV/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment files
+.env
+
+# Streamlit secrets
+.streamlit/secrets.toml
+
+# Local storage and caches
+uploads/
+vectorstore/
+data/processed/
+.pytest_cache/
+.chroma/
+
+# VS Code / IDE settings
+.vscode/
+.idea/

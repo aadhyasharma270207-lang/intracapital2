@@ -1,0 +1,19 @@
+=========================================
+INTRACAPITAL SAMPLE COMPANY: PATENT ASSETS
+=========================================
+
+Patent ID: PAT-US-10492811-B2
+Title: Low-Power Multi-Sensor Wireless Mesh Beacon for Cold Logistics
+Inventors: Dr. Marcus Vance, Sarah Jenkins
+Filing Date: October 14, 2021
+Abstract:
+A system and method for real-time monitoring of thermal and atmospheric conditions of perishables and sensitive products in transit. The invention relates to a compact, low-power sensor beacon integrating a thermal sensor, humidity sensor, and a low-frequency radio transceiver configured to establish a self-healing mesh network within shipping containers or warehouse environments. It enables micro-scale monitoring of temperature fluctuations (down to 0.05 degrees Celsius resolution) at specific pallet levels, rather than aggregate ambient container levels, utilizing adaptive power management protocols to achieve a 5-year battery life. This mesh communication allows sensors to relay data dynamically through nearby nodes to a central gateway even in shielded environment spaces.
+
+-----------------------------------------
+
+Patent ID: PAT-US-11029302-B1
+Title: Acoustic and Vibration Waveform Anomaly Detector for Rotary Industrial Equipment
+Inventors: Dr. Keith Sterling, Alan Mercer
+Filing Date: February 22, 2023
+Abstract:
+An automated diagnostic system utilizing high-frequency acoustic emissions and vibration sensors attached to industrial rotary motors (e.g., HVAC compressors, conveyor rollers, and automated sorting belts). The system captures acoustic signatures and applies high-frequency wave-shape analysis to detect microscopic micro-fissures, misalignments, and bearing wear before physical mechanical failure occurs. The system runs an edge-compute algorithm to compare real-time waveforms against a baseline and transmits warning signals when deviations exceed 15% threshold limits.
