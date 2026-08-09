@@ -1,6 +1,0 @@
-feedback_id,customer_name,industry,rating,feedback_text,date
-FB-001,Apex Pharma Logistics,Healthcare,2,Our vaccines were ruined during a 4-hour delay in Arizona because the trailer temperature sensor didn't warn us before the cooling unit failed.,2026-03-12
-FB-002,FreshGrid Supermarkets,Food & Beverage,3,We love the warehouse units but we really need an automated mobile app that alerts freight drivers 30 minutes BEFORE a thermal breach happens.,2026-04-05
-FB-003,Precision Automotive Mfg,Manufacturing,1,Unplanned compressor downtime on Assembly Line 4 cost us $450k last month. Why can't your sensors predict motor bearing failure based on heat output?,2026-04-19
-FB-004,Metro Commercial Realty,Real Estate,4,Your indoor environmental sensor logs are super accurate. We would pay a premium if you provided outdoor urban footfall and microclimate analytics for real estate site selection.,2026-05-02
-FB-005,Global Health Freight,Logistics,2,Regulatory compliance requires signed temperature audit certificates for every mile of travel. Manual logging is killing our operational margins.,2026-05-11
