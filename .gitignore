@@ -1,0 +1,47 @@
+# Local configurations
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Python Environments
+.venv/
+venv/
+ENV/
+env/
+python/
+
+# Python Caches & Compiled
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/
+*.pyc
+*.pyo
+*.pyd
+*.py.class
+
+# Database Outputs
+*.db
+*.sqlite
+
+# User Uploads
+data/uploads/
+data/processed/
+uploads/
+backend/uploads/
+
+# Node Modules and Build Targets
+node_modules/
+dist/
+build/
+.yarn/
+.pnpm-store/
+
+# IDE & Editor Settings
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
