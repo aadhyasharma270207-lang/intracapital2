@@ -196,3 +196,29 @@ def compare_opportunities(req: CompareRequest, db: Session = Depends(get_db)):
                 )
             )
     return output
+
+@router.post("/opportunities/{opportunity_id}/approve", response_model=OpportunityResponse, tags=["Opportunities"])
+def approve_opportunity(opportunity_id: str, db: Session = Depends(get_db)):
+    """
+    Mark a venture opportunity as approved by the human-in-the-loop validator.
+    """
+    opp = db.query(Opportunity).filter(Opportunity.id == opportunity_id).first()
+    if not opp:
+        raise HTTPException(status_code=404, detail="Opportunity not found.")
+    opp.status = "approved"
+    db.commit()
+    db.refresh(opp)
+    return opp
+
+@router.post("/opportunities/{opportunity_id}/reject", response_model=OpportunityResponse, tags=["Opportunities"])
+def reject_opportunity(opportunity_id: str, db: Session = Depends(get_db)):
+    """
+    Mark a venture opportunity as rejected by the human-in-the-loop validator.
+    """
+    opp = db.query(Opportunity).filter(Opportunity.id == opportunity_id).first()
+    if not opp:
+        raise HTTPException(status_code=404, detail="Opportunity not found.")
+    opp.status = "rejected"
+    db.commit()
+    db.refresh(opp)
+    return opp
