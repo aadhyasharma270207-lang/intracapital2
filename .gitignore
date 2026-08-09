@@ -1,0 +1,28 @@
+# Python virtualenv & bytecode
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Testing & Cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment & local secrets
+.env
+!.env.example
+
+# Local SQLite databases & uploads
+*.db
+intracapital.db
+test_intracapital.db
+uploaded_documents/*
+!uploaded_documents/.gitkeep
+
+# IDE & OS
+.DS_Store
+.vscode/
+.idea/

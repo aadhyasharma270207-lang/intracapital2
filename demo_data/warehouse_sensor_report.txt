@@ -1,0 +1,18 @@
+INTRACAPITAL ENTERPRISE ASSET REPORT
+Asset Type: SENSOR_DATA
+Asset Name: Warehouse Thermal Sensor Logs & Telemetry
+Company: Intracapital Corp
+Date: 2026-05-15
+
+SUMMARY:
+Continuous 24/7 telemetry logs recorded from 150 wireless temperature and humidity sensor nodes installed across Cold Storage Facilities (Zone A, Zone B, Zone C) and Mobile Refrigerated Containers.
+
+KEY TELEMETRY DATA:
+- Node TS-101 (Zone A - Frozen Pharma): Avg Temp -22.4°C (StdDev 0.3°C).
+- Node TS-204 (Mobile Reefer Fleet #42): Temp spike detected at 14:22 GMT (+4.8°C for 38 minutes). Battery power drop flagged.
+- Node TS-309 (Zone C - Produce): High humidity alarm (88% RH). Mold risk flagged for citrus pallets.
+
+TECHNICAL CAPABILITIES:
+- High frequency sensor sampling rate (every 10 seconds).
+- Modbus and MQTT protocol support with cellular fallback capabilities.
+- Integrated ambient thermal calibration algorithms.

@@ -1,0 +1,15 @@
+PRODUCT SPECIFICATION SHEET
+Product Line: Intracapital Smart Thermal Controller v4.2
+Asset Type: PRODUCT
+Company: Intracapital Corp
+
+HARDWARE SPECIFICATIONS:
+- Microcontroller: Dual-core ARM Cortex-M4 @ 180MHz with embedded FPU.
+- Wireless Interfaces: LTE-M, NB-IoT, Bluetooth 5.2, LoRaWAN (868/915 MHz).
+- Sensors Supported: Digital Temperature (-40°C to +125°C), Relative Humidity (0-100%), 3-Axis Accelerometer/Vibration, Ambient Light.
+- Power Management: Solar-rechargeable LiFePO4 battery pack with 5-year operational lifecycle.
+
+SOFTWARE CAPABILITIES:
+- Embedded Edge AI runtime supporting local anomaly detection inference.
+- RESTful API & WebSockets streaming endpoints for enterprise cloud integration.
+- Remote firmware updates over-the-air (FOTA).
