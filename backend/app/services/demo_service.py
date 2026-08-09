@@ -79,20 +79,21 @@ class DemoService:
         # Step 1: Initialize Job Status
         ProcessingJobRepository.update(db, job_id, current_step="01 Understanding Assets", progress=15.0)
         
-        # Check if FrostLink Logistics already exists, clean up if so
+        # Check if FrostLink Logistics already exists, clean up related tables if so
         existing_company = db.query(Company).filter(Company.name == "FrostLink Logistics").first()
         if existing_company:
-            # Delete old company assets & opportunities
+            # Delete old company assets & opportunities but preserve the company record/UUID
             OpportunityRepository.delete_by_company(db, existing_company.id)
-            db.delete(existing_company)
+            db.query(Asset).filter(Asset.company_id == existing_company.id).delete()
             db.commit()
-            
-        # Create FrostLink Company
-        company = CompanyRepository.create(
-            db, 
-            name="FrostLink Logistics", 
-            description="Refrigerated shipping, supply chain management, and cold storage warehousing operations provider."
-        )
+            company = existing_company
+        else:
+            # Create FrostLink Company
+            company = CompanyRepository.create(
+                db, 
+                name="FrostLink Logistics", 
+                description="Refrigerated shipping, supply chain management, and cold storage warehousing operations provider."
+            )
 
         # Create demo uploads folder
         demo_dir = settings.UPLOAD_DIR / "demo"

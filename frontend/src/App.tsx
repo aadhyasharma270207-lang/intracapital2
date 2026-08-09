@@ -149,7 +149,14 @@ export default function App() {
         if (job.status === 'completed') {
           if (jobPollRef.current) clearInterval(jobPollRef.current);
           setActiveJob(null);
-          if (company) refreshData(company.id);
+          if (job.company_id && (!company || company.id !== job.company_id)) {
+            companyApi.create("FrostLink Logistics", "Fictional logistics demo workspace.").then(comp => {
+              setCompany(comp);
+              refreshData(comp.id);
+            });
+          } else if (company) {
+            refreshData(company.id);
+          }
           setActiveTab('opportunities');
         } else if (job.status === 'failed') {
           if (jobPollRef.current) clearInterval(jobPollRef.current);

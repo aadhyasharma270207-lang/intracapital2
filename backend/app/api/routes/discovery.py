@@ -34,8 +34,6 @@ def start_discovery(
     # Queue background processing execution
     background_tasks.add_task(
         DiscoveryWorkflow.run_discovery,
-        db=db, # Since SQLAlchemy sessions are bound to request threads, we can pass it,
-               # but to prevent connection sharing, let's write a session fetcher inside.
         company_id=company_id,
         job_id=job.id
     )
