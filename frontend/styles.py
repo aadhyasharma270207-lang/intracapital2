@@ -153,10 +153,20 @@ CUSTOM_CSS = """
         box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255,255,255,0.02);
         perspective: 1200px;
         transform-style: preserve-3d;
+        word-break: normal !important;
+        overflow-wrap: break-word !important;
+        white-space: normal !important;
+        min-width: 250px !important;
+        flex-shrink: 0 !important;
+    }
+    
+    .opp-card h2, .opp-card p, .opp-card span, .opp-card div {
+        word-break: normal !important;
+        white-space: normal !important;
     }
     
     .opp-card:hover {
-        transform: perspective(1200px) rotateX(2deg) rotateY(3deg) translateY(-8px) scale(1.005);
+        transform: translateY(-6px);
         border-color: rgba(56, 189, 248, 0.45) !important;
         box-shadow: 0 20px 50px rgba(56, 189, 248, 0.16), inset 0 1px 0 rgba(255,255,255,0.06);
     }
@@ -197,10 +207,20 @@ CUSTOM_CSS = """
         transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
         perspective: 1200px;
         transform-style: preserve-3d;
+        word-break: normal !important;
+        overflow-wrap: break-word !important;
+        white-space: normal !important;
+        min-width: 250px !important;
+        flex-shrink: 0 !important;
+    }
+    
+    .top-opp-container h2, .top-opp-container p, .top-opp-container span, .top-opp-container div {
+        word-break: normal !important;
+        white-space: normal !important;
     }
     
     .top-opp-container:hover {
-        transform: perspective(1200px) rotateX(-2deg) rotateY(3deg) translateY(-8px) scale(1.005);
+        transform: translateY(-6px);
         border-color: rgba(56, 189, 248, 0.6) !important;
         box-shadow: 0 35px 70px rgba(56, 189, 248, 0.22), inset 0 1px 0 rgba(255,255,255,0.08) !important;
     }
@@ -379,6 +399,52 @@ CUSTOM_CSS = """
     }
     ::-webkit-scrollbar-thumb:hover {
         background: rgba(56, 189, 248, 0.3);
+    }
+
+    /* Responsive CSS Grid layout */
+    .dashboard-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 20px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    .card {
+        min-width: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    .card-content {
+        min-width: 0 !important;
+        overflow: hidden !important;
+    }
+    
+    .card h1, .card h2, .card h3, .card p {
+        overflow-wrap: break-word !important;
+        word-break: normal !important;
+        white-space: normal !important;
+    }
+    
+    .code-preview {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        white-space: pre-wrap !important;
+        word-break: break-all !important;
+    }
+    
+    @media (max-width: 1100px) {
+        .dashboard-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+    }
+    
+    @media (max-width: 700px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr !important;
+        }
     }
 </style>
 """

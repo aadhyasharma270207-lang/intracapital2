@@ -18,10 +18,14 @@ class OpportunityModel(BaseModel):
     evidence: List[str] = Field(..., description="Direct references to files/lines backing the opportunity")
     reasoning: str = Field(..., description="Concise explanation of the commercial opportunity")
     
-    # Optional fields populated in scoring step
+    # Optional fields populated in scoring step or advanced generation
     overall_score: Optional[float] = None
     score_explanation: Optional[str] = None
     id: Optional[str] = None
+    implementation_difficulty: Optional[str] = "Medium"
+    expected_business_impact: Optional[str] = "High Strategic Growth"
+    key_risks: Optional[List[str]] = Field(default_factory=list)
+    recommended_next_experiment: Optional[str] = "Market feasibility pilot study"
 
 class OpportunityListResponse(BaseModel):
     status: str

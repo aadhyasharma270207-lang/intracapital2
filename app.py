@@ -22,47 +22,15 @@ from frontend import components
 styles.inject_premium_styles()
 
 # 2. Retrieve Internal key safely
-FASTAPI_INTERNAL_API_KEY = ""
-try:
-    if hasattr(st, "secrets") and st.secrets is not None:
-        if "FASTAPI_INTERNAL_API_KEY" in st.secrets:
-            FASTAPI_INTERNAL_API_KEY = st.secrets["FASTAPI_INTERNAL_API_KEY"]
-except Exception:
-    pass
+from frontend.api_client import APIClient
 
-if not FASTAPI_INTERNAL_API_KEY:
-    FASTAPI_INTERNAL_API_KEY = os.getenv("FASTAPI_INTERNAL_API_KEY", "")
+# Initialize API Client singleton
+api_client = APIClient()
 
-# 3. HTTP Client Helper
 def call_backend(method: str, endpoint: str, json_data: dict = None, files_data: list = None) -> dict:
-    url = f"{config.FASTAPI_BASE_URL}{endpoint}"
-    headers = {}
-    if FASTAPI_INTERNAL_API_KEY:
-        headers["Authorization"] = f"Bearer {FASTAPI_INTERNAL_API_KEY}"
-        
-    try:
-        with httpx.Client(timeout=120.0) as client:
-            if method.upper() == "GET":
-                response = client.get(url, headers=headers)
-            elif method.upper() == "POST":
-                if files_data:
-                    response = client.post(url, headers=headers, files=files_data)
-                else:
-                    response = client.post(url, headers=headers, json=json_data)
-                    
-            response.raise_for_status()
-            return response.json()
-    except httpx.HTTPStatusError as e:
-        try:
-            err = e.response.json().get("detail", str(e))
-        except Exception:
-            err = e.response.text or str(e)
-        return {"status": "error", "error": f"Backend Error: {err}"}
-    except Exception as e:
-        return {
-            "status": "error", 
-            "error": f"Cannot connect to FastAPI backend at {config.FASTAPI_BASE_URL}. Ensure uvicorn is running."
-        }
+    # Ensure backend URL is synced with session state text input
+    api_client.backend_url = st.session_state.get("backend_url", api_client.backend_url)
+    return api_client._request(method, endpoint, json_data=json_data, files_data=files_data)
 
 # 4. Global Session State
 if "opportunities" not in st.session_state:
@@ -77,6 +45,8 @@ if "canvas_caches" not in st.session_state:
     st.session_state.canvas_caches = {}
 if "validation_caches" not in st.session_state:
     st.session_state.validation_caches = {}
+if "backend_url" not in st.session_state:
+    st.session_state.backend_url = api_client.backend_url
 
 # 5. Sidebar Navigation Logo
 st.sidebar.markdown(
@@ -90,6 +60,14 @@ st.sidebar.markdown(
     """,
     unsafe_allow_html=True
 )
+
+st.sidebar.markdown("---")
+
+custom_url = st.sidebar.text_input("🔗 Backend API Endpoint", value=st.session_state.backend_url)
+if custom_url != st.session_state.backend_url:
+    st.session_state.backend_url = custom_url
+    api_client.backend_url = custom_url
+    st.rerun()
 
 st.sidebar.markdown("---")
 
@@ -108,6 +86,11 @@ page = st.sidebar.radio("Navigation Menu", [
 ])
 
 # Quick Server health indicator in Sidebar footer
+try:
+    backend_port = api_client.backend_url.split(":")[-1].split("/")[0]
+except Exception:
+    backend_port = "8000"
+
 health_res = call_backend("GET", "/health")
 is_fastapi_online = health_res.get("status") != "error"
 granite_status = health_res.get("granite", "offline") if is_fastapi_online else "offline"
@@ -116,44 +99,50 @@ is_granite_live = granite_status == "online"
 st.sidebar.markdown("---")
 if is_fastapi_online:
     st.sidebar.markdown(
-        """
+        f"""
         <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: #10b981; margin-bottom: 4px;">
             <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background-color:#10b981; box-shadow:0 0 8px #10b981;"></span>
-            FastAPI Backend Online
+            FastAPI Connected • :{backend_port}
         </div>
         """, 
         unsafe_allow_html=True
     )
-    if is_granite_live:
-        st.sidebar.markdown(
-            """
-            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: #10b981;">
-                <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background-color:#10b981; box-shadow:0 0 8px #10b981;"></span>
-                Live IBM Granite Active
-            </div>
-            """, 
-            unsafe_allow_html=True
-        )
+    
+    root_res = call_backend("GET", "/")
+    mode_label = root_res.get("mode", "") if root_res.get("status") != "error" else ""
+    if is_granite_live and "Sandbox" not in mode_label:
+        engine_label = "IBM Granite"
     else:
-        st.sidebar.markdown(
-            """
-            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: #f59e0b;">
-                <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background-color:#f59e0b; box-shadow:0 0 8px #f59e0b;"></span>
-                Simulation Sandbox Mode
-            </div>
-            """, 
-            unsafe_allow_html=True
-        )
+        engine_label = "Local Fallback"
+        
+    st.sidebar.markdown(
+        f"""
+        <div style="font-size: 0.8rem; color: #94a3b8; font-weight: 500;">
+            AI Engine: <b>{engine_label}</b>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 else:
     st.sidebar.markdown(
         """
-        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: #f43f5e;">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: #f43f5e; margin-bottom: 8px;">
             <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background-color:#f43f5e; box-shadow:0 0 8px #f43f5e;"></span>
-            FastAPI Backend Offline
+            Backend Offline
         </div>
         """, 
         unsafe_allow_html=True
     )
+    if st.sidebar.button("Retry Connection", key="retry_sidebar"):
+        st.rerun()
+
+# If backend is offline, halt execution and display warning banner on main dashboard
+if not is_fastapi_online:
+    st.error("⚠️ **Backend connection unavailable.**")
+    st.info(f"Please verify that the FastAPI backend server is running at: `{api_client.backend_url}`")
+    if st.button("Retry Connection", key="retry_main"):
+        st.rerun()
+    st.stop()
 
 # ==========================================
 # Page 1: ⌂ Overview
@@ -191,9 +180,9 @@ if page == "⌂ Overview":
             st.markdown(
                 f"""
                 <div style="background: rgba(11,16,36,0.6); border:1px solid rgba(56,189,248,0.1); border-radius:12px; padding:16px; font-size:0.85rem; color:#cbd5e1; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                    <b>Endpoint Port:</b> <code style="color:#38bdf8;">localhost:8080</code><br>
+                    <b>Endpoint Port:</b> <code style="color:#38bdf8;">localhost:{backend_port}</code><br>
                     <b>Database Collections:</b> <code style="color:#38bdf8;">ChromaDB (Local)</code><br>
-                    <b>Authentication Key:</b> <code style="color:#38bdf8;">{'CONFIGURED' if FASTAPI_INTERNAL_API_KEY else 'NONE'}</code>
+                    <b>Authentication Key:</b> <code style="color:#38bdf8;">{'CONFIGURED' if api_client.api_key else 'NONE'}</code>
                 </div>
                 """,
                 unsafe_allow_html=True
@@ -281,65 +270,218 @@ elif page == "◈ Company Assets":
 # ==========================================
 elif page == "◉ Discovery":
     st.markdown("## ◉ Venture Discovery Console")
-    st.write("Run the analysis pipeline and trigger the synthesis engine:")
     
-    # 1. Ingestion Pipeline flow diagram
-    st.markdown("### Data pipeline Indexing Flow")
-    metrics_res = call_backend("GET", "/metrics")
+    # Sleek Business Welcome Banner
+    st.markdown(
+        """
+        <div style="background: rgba(30, 41, 59, 0.35); border: 1px solid rgba(56, 189, 248, 0.15); border-radius: 16px; padding: 20px; margin-bottom: 25px;">
+            <h3 style="margin: 0; color: #fff; font-family: Outfit; font-size: 1.35rem; font-weight: 700; letter-spacing: -0.01em;">🔮 Cognitive Venture Ingestion & Synthesis</h3>
+            <p style="margin: 6px 0 0 0; color: #94a3b8; font-size: 0.95rem; line-height: 1.5; font-weight: 300;">
+                Bridge operational and intellectual property silos. This discovery console coordinates the ingestion of corporate assets,
+                normalizes data streams, and invokes <b>IBM Granite AI</b> to identify cross-domain market-ready venture opportunities.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
     
-    components.render_pipeline_flow(st.session_state.pipeline_step)
-    
-    col_pipe1, col_pipe2 = st.columns(2)
-    with col_pipe1:
-        if st.button("⚙️ RUN ANALYSIS PIPELINE", use_container_width=True):
-            with st.spinner("Analyzing and indexing vector spaces..."):
-                res = call_backend("POST", "/analyze")
-                if res.get("status") != "error":
-                    st.success(f"Analysis completed! {res.get('chunks_created')} chunks indexed.")
-                    st.session_state.pipeline_step = "READY"
-                else:
-                    st.error(res.get("error"))
-    with col_pipe2:
-        discover_btn = st.button("🚀 DISCOVER HIDDEN BUSINESSES", use_container_width=True, type="primary")
+    # Query staged files list
+    staged_files = []
+    if config.UPLOADS_DIR.exists():
+        staged_files = [f.name for f in config.UPLOADS_DIR.iterdir() if f.is_file()]
         
-    log_area = st.empty()
+    # Render Two-Column Business Action Dashboard
+    col_dash1, col_dash2 = st.columns(2)
     
+    with col_dash1:
+        st.markdown(
+            f"""
+            <div class="opp-card" style="margin-bottom: 0; height: 100%; display: flex; flex-direction: column; justify-content: space-between; border-color: rgba(56, 189, 248, 0.15);">
+                <div>
+                    <span style="font-size:0.75rem; text-transform:uppercase; font-weight:800; color:#38bdf8; letter-spacing:0.05em; display:block; margin-bottom:8px;">PHASE 01</span>
+                    <h3 style="margin:0; font-family:Outfit; font-size:1.3rem; color:#fff;">📂 Corporate Data Preparation</h3>
+                    <p style="font-size:0.85rem; color:#94a3b8; margin: 8px 0 15px 0; line-height:1.45;">
+                        Extracts textual streams from PDF patents, parses CSV telemetry logs, cleans punctuation, chunks passages, and generates semantic vector indices in ChromaDB.
+                    </p>
+                    <div style="background: rgba(15, 23, 42, 0.3); border-radius: 8px; padding: 10px; border: 1px solid rgba(255,255,255,0.03); margin-bottom: 15px;">
+                        <span style="font-size: 0.75rem; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">Staged Corporate Assets ({len(staged_files)}):</span>
+                        { "".join([f'<div style="font-size:0.75rem; color:#94a3b8; padding: 2px 0;">📄 {name}</div>' for name in staged_files]) if staged_files else '<div style="font-size:0.75rem; color:#f43f5e; font-style:italic;">No files loaded. Go to "◈ Company Assets" page to stage files.</div>' }
+                    </div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        run_analysis = st.button("⚙️ RUN DATA PREPARATION PIPELINE", use_container_width=True)
+        
+    with col_dash2:
+        st.markdown(
+            """
+            <div class="opp-card" style="margin-bottom: 0; height: 100%; display: flex; flex-direction: column; justify-content: space-between; border-color: rgba(16, 185, 129, 0.15);">
+                <div>
+                    <span style="font-size:0.75rem; text-transform:uppercase; font-weight:800; color:#10b981; letter-spacing:0.05em; display:block; margin-bottom:8px;">PHASE 02</span>
+                    <h3 style="margin:0; font-family:Outfit; font-size:1.3rem; color:#fff;">🧠 Cognitive AI Synthesis</h3>
+                    <p style="font-size:0.85rem; color:#94a3b8; margin: 8px 0 15px 0; line-height:1.45;">
+                        Queries the semantic database, detects correlations between customer friction logs and technical patents, and invokes IBM Granite to draft, score, and rank new business opportunities.
+                    </p>
+                    <div style="background: rgba(16, 185, 129, 0.05); border-radius: 8px; padding: 10px; border: 1px solid rgba(16, 185, 129, 0.15); margin-bottom: 15px;">
+                        <span style="font-size: 0.75rem; font-weight: 600; color: #10b981; display: block; margin-bottom: 4px;">Cognitive Engines Armed:</span>
+                        <div style="font-size:0.75rem; color:#94a3b8; padding: 2px 0;">🎯 Semantic Vector Search (Local Embeddings)</div>
+                        <div style="font-size:0.75rem; color:#94a3b8; padding: 2px 0;">⚡ IBM Granite Instruction Synthesis (watsonx.ai)</div>
+                    </div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        discover_btn = st.button("🚀 DISCOVER HIDDEN BUSINESSES", use_container_width=True, type="primary")
+
+    st.markdown("---")
+    
+    # 2. Ingestion Pipeline flow diagram with real-time sync wrapper
+    st.markdown("### 🛰️ Live Pipeline Stage Monitor")
+    
+    flow_area = st.empty()
+    with flow_area:
+        components.render_pipeline_flow(st.session_state.pipeline_step)
+        
+    status_text = st.empty()
+    progress_bar = st.empty()
+    
+    if run_analysis:
+        st.session_state.pipeline_logs = []
+        pbar = progress_bar.progress(0)
+        import time
+        
+        st.session_state.pipeline_step = "UPLOAD"
+        with flow_area:
+            components.render_pipeline_flow("UPLOAD")
+        status_text.markdown("● **UPLOAD**: Scanning staged directory and checking SHA-256 cache registry...")
+        pbar.progress(15)
+        time.sleep(0.3)
+        
+        st.session_state.pipeline_step = "EXTRACT"
+        with flow_area:
+            components.render_pipeline_flow("EXTRACT")
+        status_text.markdown("✓ **UPLOAD** cache checked.<br>● **EXTRACT**: Parsing file types and converting bytes into text segments...", unsafe_allow_html=True)
+        pbar.progress(35)
+        time.sleep(0.3)
+        
+        st.session_state.pipeline_step = "CLEAN"
+        with flow_area:
+            components.render_pipeline_flow("CLEAN")
+        status_text.markdown("✓ **UPLOAD** cache checked.<br>✓ **EXTRACT** complete.<br>● **CLEAN**: Stripping whitespace, removing document metadata anomalies...", unsafe_allow_html=True)
+        pbar.progress(55)
+        time.sleep(0.3)
+        
+        st.session_state.pipeline_step = "CHUNK"
+        with flow_area:
+            components.render_pipeline_flow("CHUNK")
+        status_text.markdown("✓ **UPLOAD** cache checked.<br>✓ **EXTRACT** complete.<br>✓ **CLEAN** complete.<br>● **CHUNK & EMBED**: Segmenting passages and running sentence-transformers vector embeddings...", unsafe_allow_html=True)
+        pbar.progress(70)
+        
+        # Real backend POST /analyze
+        res = call_backend("POST", "/analyze")
+        
+        if res.get("status") != "error":
+            st.session_state.pipeline_step = "INDEX"
+            with flow_area:
+                components.render_pipeline_flow("INDEX")
+            status_text.markdown(f"✓ **UPLOAD** cache checked.<br>✓ **EXTRACT** complete.<br>✓ **CLEAN** complete.<br>✓ **CHUNK & EMBED** complete.<br>✓ **INDEX**: Saved {res.get('chunks_created')} chunks to ChromaDB vector store.", unsafe_allow_html=True)
+            pbar.progress(100)
+            st.success(f"Analysis completed in {res.get('processing_time_sec', 0.8)} seconds!")
+            
+            st.session_state.pipeline_step = "READY"
+            with flow_area:
+                components.render_pipeline_flow("READY")
+            time.sleep(1.0)
+            st.rerun()
+        else:
+            st.error(res.get("error"))
+            
     if discover_btn:
         st.session_state.pipeline_logs = []
+        pbar = progress_bar.progress(0)
+        import time
         
-        def add_log(msg):
-            st.session_state.pipeline_logs.append(msg)
-            log_area.code("\n".join(st.session_state.pipeline_logs))
-            
-        add_log("[STAGE 01] UNDERSTANDING COMPANY ASSETS...")
-        import time; time.sleep(0.4)
+        st.session_state.pipeline_step = "READY"
+        with flow_area:
+            components.render_pipeline_flow("READY")
+        status_text.markdown("● **STAGE 01**: Inspecting local cached vector structures...")
+        pbar.progress(20)
+        time.sleep(0.3)
         
-        add_log("[STAGE 02] RETRIEVING RELEVANT EVIDENCE CONTEXT...")
-        time.sleep(0.4)
+        status_text.markdown("✓ **STAGE 01** complete.<br>● **STAGE 02**: Running RAG vector queries and locating semantic correlations...", unsafe_allow_html=True)
+        pbar.progress(40)
+        time.sleep(0.3)
         
-        add_log("[STAGE 03] CONNECTING HIDDEN SIGNALS...")
-        time.sleep(0.4)
+        status_text.markdown("✓ **STAGE 01 & 02** complete.<br>● **STAGE 03**: Aligning asset technology capabilities against customer pain points...", unsafe_allow_html=True)
+        pbar.progress(60)
+        time.sleep(0.3)
         
-        add_log("[STAGE 04] CALLING IBM GRANITE ANALYSIS...")
+        status_text.markdown("✓ **STAGE 01, 02 & 03** complete.<br>● **STAGE 04**: Calling IBM Granite generative synthesis model...", unsafe_allow_html=True)
+        pbar.progress(80)
         
+        # Real backend POST /discover
         res = call_backend("POST", "/discover")
+        
         if res.get("status") != "error":
-            add_log("[STAGE 05] EVALUATING OPPORTUNITIES...")
-            time.sleep(0.4)
-            
-            add_log("[STAGE 06] RANKING RESULTS... COMPLETE.")
-            time.sleep(0.4)
+            status_text.markdown("✓ **STAGE 01 to 04** complete.<br>● **STAGE 05**: Executing weighted scoring and ranking matrix...", unsafe_allow_html=True)
+            pbar.progress(95)
+            time.sleep(0.3)
             
             st.session_state.opportunities = res.get("opportunities", [])
             st.session_state.evidence_used = res.get("evidence_used", [])
-            st.success("Venture discovery completed successfully! Switch to the '◆ Opportunities' tab to view results.")
-        else:
-            add_log(f"[API ERROR] {res.get('error')}")
-            st.error("Engine execution encountered errors. Defaulting to Demo Mode fallback.")
             
-            # Load fallback demo items
+            pbar.progress(100)
+            status_text.markdown(f"✓ **PIPELINE COMPLETE**: Synthesized and ranked {len(st.session_state.opportunities)} opportunities.", unsafe_allow_html=True)
+            st.success("Venture discovery completed successfully! Switch to the '◆ Opportunities' tab to view results.")
+            time.sleep(1.0)
+            st.rerun()
+        else:
+            status_text.markdown(f"❌ **STAGE 04 FAILED**: {res.get('error')}", unsafe_allow_html=True)
+            st.error("Engine execution encountered errors. Defaulting to Demo Mode fallback.")
             res_fallback = call_backend("GET", "/opportunities")
             st.session_state.opportunities = res_fallback.get("opportunities", [])
+            time.sleep(1.5)
+            st.rerun()
+
+    # Business Explainability Graphic
+    st.markdown("---")
+    st.markdown("### 💡 How the Cognitive Engine Connects the Dots")
+    st.markdown(
+        """
+        <div style="background: rgba(11, 16, 36, 0.4); border: 1px solid rgba(56, 189, 248, 0.08); border-radius: 12px; padding: 18px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px; text-align: center;">
+                <div style="flex: 1; min-width: 120px;">
+                    <div style="font-size: 1.8rem; margin-bottom: 4px;">📡</div>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: #fff; display: block;">1. Technical Patents</span>
+                    <span style="font-size: 0.75rem; color: #64748b;">Underutilized IP & designs</span>
+                </div>
+                <div style="font-size: 1.2rem; color: #475569;">+</div>
+                <div style="flex: 1; min-width: 120px;">
+                    <div style="font-size: 1.8rem; margin-bottom: 4px;">📈</div>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: #fff; display: block;">2. Real-Time Telemetry</span>
+                    <span style="font-size: 0.75rem; color: #64748b;">Sensor logs & deviations</span>
+                </div>
+                <div style="font-size: 1.2rem; color: #475569;">+</div>
+                <div style="flex: 1; min-width: 120px;">
+                    <div style="font-size: 1.8rem; margin-bottom: 4px;">💬</div>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: #fff; display: block;">3. Customer Complaints</span>
+                    <span style="font-size: 0.75rem; color: #64748b;">Market friction & friction logs</span>
+                </div>
+                <div style="font-size: 1.2rem; color: #10b981;">➔</div>
+                <div style="flex: 1.2; min-width: 150px; background: rgba(16, 185, 129, 0.08); border: 1px dashed rgba(16, 185, 129, 0.25); border-radius: 8px; padding: 10px;">
+                    <div style="font-size: 1.8rem; margin-bottom: 4px;">🔮</div>
+                    <span style="font-size: 0.85rem; font-weight: 700; color: #10b981; display: block;">Discovered Venture</span>
+                    <span style="font-size: 0.75rem; color: #94a3b8;">Scored & validated opportunities</span>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
 
 # ==========================================
 # Page 4: ◆ Opportunities
@@ -387,70 +529,132 @@ elif page == "◆ Opportunities":
             
         st.markdown(f"Showing **{len(filtered_opps)}** of **{len(opps)}** opportunities:")
         
-        for idx, opp in enumerate(filtered_opps):
-            is_top = (idx == 0)
-            components.render_opportunity_card(opp, rank=idx+1, is_top=is_top)
+        # Render opportunity cards side-by-side horizontally using a native responsive CSS grid
+        if filtered_opps:
+            grid_html = '<div class="dashboard-grid">'
+            for idx, opp in enumerate(filtered_opps):
+                is_top = (idx == 0)
+                card_markup = components.get_opportunity_card_html(opp, rank=idx+1, is_top=is_top)
+                grid_html += f'<div class="card"><div class="card-content">{card_markup}</div></div>'
+            grid_html += '</div>'
             
-            # Drill-down expander
-            opp_id = opp.get("id")
-            with st.expander(f"🔍 Access Comprehensive Evidence & Drill-Down Insights for {opp.get('name')}"):
-                # 1. Evidence Grounding
-                st.markdown("#### 📜 Grounding Evidence Sources")
-                evidence_list = st.session_state.evidence_used
-                if not evidence_list:
-                    # Fallback check
-                    res_fallback = call_backend("POST", "/discover")
-                    evidence_list = res_fallback.get("evidence_used", [])
-                    st.session_state.evidence_used = evidence_list
+            st.markdown(grid_html, unsafe_allow_html=True)
                     
-                assets_used = opp.get("existing_assets", [])
-                relevant_chunks = [
-                    c for c in evidence_list 
-                    if any(asset.lower()[:15] in str(c.get("filename", "")).lower() for asset in assets_used)
-                    or any(asset.lower()[:15] in str(c.get("text", "")).lower() for asset in assets_used)
-                    or "feedback" in str(c.get("filename", "")).lower()
-                ]
-                if not relevant_chunks:
-                    relevant_chunks = evidence_list[:2]
-                    
-                for chunk_idx, c in enumerate(relevant_chunks):
-                    st.markdown(
-                        f"""
-                        <div style="background: rgba(30, 41, 59, 0.2); border: 1px solid rgba(255,255,255,0.02); border-radius: 6px; padding: 10px; margin-bottom: 8px;">
-                            <span style="font-size:0.75rem; font-weight:600; color:#818cf8;">📜 Source: <code>{c.get('filename')}</code> (Relevance: {c.get('relevance', 80.0)}%)</span>
-                            <p style="font-size:0.85rem; color:#cbd5e1; margin: 4px 0 0 0; font-style: italic;">"{c.get('text')[:300]}..."</p>
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
+            st.markdown("---")
+            st.markdown("### 🔍 Access Comprehensive Evidence & Drill-Down Insights")
+            
+            selected_opp_name = st.selectbox(
+                "Select a Discovered Venture to view grounding data, target models, and validations:",
+                [opp.get("name") for opp in filtered_opps],
+                key="select_drilldown"
+            )
+            
+            selected_opp = next((opp for opp in filtered_opps if opp.get("name") == selected_opp_name), None)
+            if selected_opp:
+                opp_id = selected_opp.get("id")
                 
-                # 2. Business Model Canvas Drill-down
-                st.markdown("#### 💼 Business Model Canvas Expansion")
-                if opp_id in st.session_state.canvas_caches:
-                    canvas = st.session_state.canvas_caches[opp_id]
-                    col_c1, col_c2 = st.columns(2)
-                    with col_c1:
-                        st.markdown(f"🎯 **Customer Segment:** {canvas.get('target_customer')}")
-                        st.markdown(f"💎 **Value Proposition:** {canvas.get('value_proposition')}")
-                        st.markdown(f"💳 **Monetization Model:** {canvas.get('revenue_model')}")
-                    with col_c2:
-                        st.markdown(f"🔗 **Key Resources:** {canvas.get('key_resources')}")
-                        st.markdown(f"⚙️ **Key Activities:** {canvas.get('key_activities')}")
-                        st.markdown(f"🧪 **Validation Experiment:** {canvas.get('first_validation_experiment')}")
-                else:
-                    if st.button(f"Generate Canvas details for {opp.get('name')}", key=f"btn_canvas_{opp_id}"):
-                        with st.spinner("Expanding canvas blocks via IBM Granite..."):
-                            res_canvas = call_backend("POST", "/expand-business-model", json_data={"opportunity_id": opp_id})
-                            if res_canvas.get("status") != "error":
-                                st.session_state.canvas_caches[opp_id] = res_canvas
-                                st.success("Canvas generated! Rerunning to load details...")
-                                st.rerun()
-                            else:
-                                st.error(res_canvas.get("error"))
-                                
-                # 3. Decision metrics score explanation
-                st.markdown("#### ⚖️ Transparent Scoring Breakdown")
-                st.code(opp.get("score_explanation", ""))
+                # Tabbed Drilldown Interface
+                tab_brief, tab_canvas, tab_network, tab_scoring = st.tabs([
+                    "📄 Strategic Brief & Impact",
+                    "💼 Business Model Canvas",
+                    "🛰️ Asset Connections & Grounding",
+                    "⚖️ Transparent Scoring Breakdown"
+                ])
+                
+                with tab_brief:
+                    st.markdown(f"### Strategic Brief: *{selected_opp.get('name')}*")
+                    col_m1, col_m2 = st.columns(2)
+                    with col_m1:
+                        st.markdown(f"💼 **Expected Business Impact:** {selected_opp.get('expected_business_impact', 'High Strategic Growth')}")
+                        st.markdown(f"🛠️ **Implementation Difficulty:** {selected_opp.get('implementation_difficulty', 'Medium')}")
+                    with col_m2:
+                        st.markdown(f"🔬 **Recommended Next Experiment:** {selected_opp.get('recommended_next_experiment', 'Feasibility prototype pilot study')}")
+                        st.markdown(f"⚠️ **Key Risks:** {', '.join(selected_opp.get('key_risks', [])) if selected_opp.get('key_risks') else 'None identified'}")
+                    
+                    st.markdown("---")
+                    brief_key = f"brief_active_{opp_id}"
+                    if brief_key not in st.session_state:
+                        st.session_state[brief_key] = False
+                        
+                    if st.button(f"📄 GENERATE CONFIDENTIAL EXECUTIVE BRIEF", key=f"btn_brief_{opp_id}", use_container_width=True):
+                        st.session_state[brief_key] = True
+                        
+                    if st.session_state[brief_key]:
+                        st.markdown(
+                            f"""
+                            <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 12px; padding: 20px; margin-top: 15px; box-shadow: 0 8px 24px rgba(0,0,0,0.3);">
+                                <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px; margin-bottom:15px;">
+                                    <span style="font-family:Outfit; font-size:1.15rem; font-weight:800; color:#fff;">📋 INTRACAPITAL VENTURE EXECUTIVE BRIEF</span>
+                                    <span style="color:#38bdf8; font-size:0.75rem; font-weight:700;">CONFIDENTIAL &bull; ENTERPRISE AI</span>
+                                </div>
+                                <p style="font-size:0.95rem; color:#cbd5e1; margin-bottom:8px;"><b>Venture Opportunity:</b> {selected_opp.get('name')}</p>
+                                <p style="font-size:0.95rem; color:#cbd5e1; margin-bottom:8px;"><b>Business Thesis:</b> {selected_opp.get('pitch')}</p>
+                                <p style="font-size:0.95rem; color:#cbd5e1; margin-bottom:8px;"><b>Department Assets Reused:</b> {', '.join(selected_opp.get('existing_assets', []))}</p>
+                                <p style="font-size:0.95rem; color:#cbd5e1; margin-bottom:8px;"><b>Market Potential Score:</b> {selected_opp.get('market_potential', 0.0):.0f}/100 &bull; <b>Feasibility:</b> {selected_opp.get('feasibility', 0.0):.0f}/100</p>
+                                <p style="font-size:0.95rem; color:#cbd5e1; margin-bottom:8px;"><b>Strategic Impact:</b> {selected_opp.get('expected_business_impact', 'High Strategic Growth')}</p>
+                                <p style="font-size:0.95rem; color:#cbd5e1; margin-bottom:8px;"><b>First Recommended Experiment:</b> {selected_opp.get('recommended_next_experiment', 'Validate prototype sensor feeds')}</p>
+                                <p style="font-size:0.85rem; color:#94a3b8; margin-top:15px; font-style:italic; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px;">Powered by IBM watsonx.ai & Granite synthesis reasoning.</p>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+                        
+                with tab_canvas:
+                    if opp_id in st.session_state.canvas_caches:
+                        canvas = st.session_state.canvas_caches[opp_id]
+                        components.render_business_model_canvas(selected_opp, canvas)
+                    else:
+                        st.write("Generate the expanded business model canvas blocks using IBM Granite:")
+                        if st.button(f"Generate Canvas details for {selected_opp.get('name')}", key=f"btn_canvas_{opp_id}"):
+                            with st.spinner("Expanding canvas blocks via IBM Granite..."):
+                                res_canvas = call_backend("POST", "/expand-business-model", json_data={"opportunity_id": opp_id})
+                                if res_canvas.get("status") != "error":
+                                    st.session_state.canvas_caches[opp_id] = res_canvas
+                                    st.success("Canvas generated! Rerunning to load details...")
+                                    st.rerun()
+                                else:
+                                    st.error(res_canvas.get("error"))
+                                    
+                with tab_network:
+                    # Grounding Evidence sources
+                    st.markdown("#### 📜 Grounding Evidence Sources")
+                    evidence_list = st.session_state.evidence_used
+                    if not evidence_list:
+                        res_fallback = call_backend("POST", "/discover")
+                        evidence_list = res_fallback.get("evidence_used", [])
+                        st.session_state.evidence_used = evidence_list
+                        
+                    assets_used = selected_opp.get("existing_assets", [])
+                    relevant_chunks = [
+                        c for c in evidence_list 
+                        if any(asset.lower()[:15] in str(c.get("filename", "")).lower() for asset in assets_used)
+                        or any(asset.lower()[:15] in str(c.get("text", "")).lower() for asset in assets_used)
+                        or "feedback" in str(c.get("filename", "")).lower()
+                        or "sensor" in str(c.get("filename", "")).lower()
+                    ]
+                    
+                    if not relevant_chunks:
+                        relevant_chunks = evidence_list[:2]
+                        
+                    for chunk_idx, c in enumerate(relevant_chunks):
+                        st.markdown(
+                            f"""
+                            <div style="background: rgba(30, 41, 59, 0.2); border: 1px solid rgba(255,255,255,0.02); border-radius: 6px; padding: 10px; margin-bottom: 8px;">
+                                <span style="font-size:0.75rem; font-weight:600; color:#818cf8;">📜 Source: <code>{c.get('filename')}</code> (Relevance: {c.get('relevance', 80.0)}%)</span>
+                                <p style="font-size:0.85rem; color:#cbd5e1; margin: 4px 0 0 0; font-style: italic;">"{c.get('text')[:300]}..."</p>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+                    st.markdown("---")
+                    components.render_opportunity_network(selected_opp)
+                    
+                with tab_scoring:
+                    st.markdown("#### ⚖️ Transparent Scoring Breakdown")
+                    st.code(selected_opp.get("score_explanation", ""))
+                    
+        else:
+            st.info("No venture discoveries currently loaded. Go to the assets tab or click discover.")
     else:
         st.info("No venture discoveries currently loaded. Go to the assets tab or click discover.")
 

@@ -15,6 +15,37 @@ from backend.services import rag_service
 from backend.services import granite_service
 from backend.services import opportunity_service
 
+# Check backend port availability from env variables
+import socket
+import sys
+
+backend_host = os.getenv("BACKEND_HOST", "127.0.0.1")
+try:
+    backend_port = int(os.getenv("BACKEND_PORT", "8000"))
+except ValueError:
+    backend_port = 8000
+
+def is_port_in_use(host: str, port: int) -> bool:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        try:
+            s.bind((host, port))
+            return False
+        except OSError:
+            return True
+
+# Only verify if we are not running within a test suite (pytest/unittest)
+is_test = "pytest" in sys.modules or "unittest" in sys.modules or os.getenv("TESTING") == "1"
+
+if not is_test and is_port_in_use(backend_host, backend_port):
+    print("=" * 60)
+    print(f"❌ ERROR: Port {backend_port} is already in use on {backend_host}!")
+    print("To resolve this, you can:")
+    print("1. Kill the process occupying this port.")
+    print("2. Set a different port using the BACKEND_PORT environment variable.")
+    print("   Example: set BACKEND_PORT=8002")
+    print("=" * 60)
+    sys.exit(1)
+
 # Initialize FastAPI App
 app = FastAPI(
     title="INTRACAPITAL Backend API",
@@ -40,22 +71,21 @@ granite_client = granite_service.GraniteService()
 opportunity_manager = opportunity_service.OpportunityService()
 
 # Helper for secure API token verification
-def verify_api_key(authorization: Optional[str] = Header(None)):
+def verify_api_key(x_api_key: Optional[str] = Header(None, alias="X-API-Key")):
     """
-    Verifies the internal Authorization header token if configured.
+    Verifies the internal X-API-Key header token if configured.
     Bypasses authentication if FASTAPI_INTERNAL_API_KEY is not set in environment.
     """
     if config.FASTAPI_INTERNAL_API_KEY:
-        if not authorization or not authorization.startswith("Bearer "):
+        if not x_api_key:
             raise HTTPException(
                 status_code=401, 
-                detail="Missing or malformed Authorization header. Expected 'Bearer <token>'."
+                detail="Missing X-API-Key header."
             )
-        token = authorization.split(" ")[1]
-        if token != config.FASTAPI_INTERNAL_API_KEY:
+        if x_api_key != config.FASTAPI_INTERNAL_API_KEY:
             raise HTTPException(
                 status_code=401, 
-                detail="Unauthorized. Invalid internal API token."
+                detail="Unauthorized. Invalid X-API-Key."
             )
 
 # ==========================================
@@ -274,7 +304,7 @@ def validate_opportunity(
     a = req.asset_reusability
     c = req.confidence
     
-    adj_score = (m * 0.30) + (f * 0.25) + (s * 0.20) + (a * 0.15) + (c * 0.10)
+    adj_score = (m * 0.30) + (s * 0.25) + (f * 0.20) + (a * 0.15) + (c * 0.10)
     adj_score = round(adj_score, 1)
     
     diff = round(adj_score - orig_score, 1)
@@ -282,8 +312,8 @@ def validate_opportunity(
     explanation = (
         f"Adjusted Overall Score: {adj_score:.1f}/100. Breakdown:\n"
         f"- Market Potential (30%): {m:.1f}/100 (Contrib: {m * 0.30:.1f})\n"
-        f"- Feasibility (25%): {f:.1f}/100 (Contrib: {f * 0.25:.1f})\n"
-        f"- Strategic Fit (20%): {s:.1f}/100 (Contrib: {s * 0.20:.1f})\n"
+        f"- Strategic Fit (25%): {s:.1f}/100 (Contrib: {s * 0.25:.1f})\n"
+        f"- Feasibility (20%): {f:.1f}/100 (Contrib: {f * 0.20:.1f})\n"
         f"- Asset Reusability (15%): {a:.1f}/100 (Contrib: {a * 0.15:.1f})\n"
         f"- Confidence (10%): {c:.1f}/100 (Contrib: {c * 0.10:.1f})"
     )

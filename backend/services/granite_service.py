@@ -238,7 +238,11 @@ Malformed text:
                 "asset_reusability": 90.0,
                 "confidence": 95.0,
                 "evidence": ["patents.txt: Patent PAT-US-10492811-B2", "customer_feedback.txt: shipment spoilage logs"],
-                "reasoning": "Direct solution to thermal fluctuations using patented mesh telemetry."
+                "reasoning": "Direct solution to thermal fluctuations using patented mesh telemetry.",
+                "implementation_difficulty": "Medium",
+                "expected_business_impact": "High cost savings by reducing cold chain write-offs by 90%",
+                "key_risks": ["Radio signal attenuation through dense cargo boxes", "Calibrating temperature sensors across extreme ranges"],
+                "recommended_next_experiment": "Deploy 5 mesh beacons in a pilot run containing organic strawberries over a 15-mile transit."
             })
             
         if has_maintenance:
@@ -247,8 +251,8 @@ Malformed text:
                 "pitch": "Acoustic motor waveform diagnostics preventing cooling compressor breakdowns.",
                 "problem": "Unexpected facilities compressor failures causing zone cooling outages and asset spoilage.",
                 "solution": "Analyze motor shaft vibration signatures (PAT-US-11029302-B1) using edge wear prediction code (RD-2025-102).",
-                "existing_assets": ["Patent PAT-US-11029302-B1 (Acoustic Detector)", "Research RD-2025-102 (ML Wear Prediction)"],
-                "asset_connection": "Pairs wave detectors with predictive decay algorithms to flag failures.",
+                "existing_assets": ["Patent PAT-US-11029302-B1 (Acoustic Detector)", "Research RD-2025-102 (ML Compressor Wear Model)"],
+                "asset_connection": "Pairs acoustic signature analysis edge patent (PAT-US-11029302-B1) with internal compressor ML predictive code (RD-2025-102) to monitor warehouse and container refrigeration hardware.",
                 "target_customers": ["Refrigerated Warehouse Operators", "Industrial Plant Facilities Managers"],
                 "revenue_model": "Predictive maintenance licensing and subscription dashboard per cooling unit.",
                 "market_potential": 85.0,
@@ -257,7 +261,11 @@ Malformed text:
                 "asset_reusability": 85.0,
                 "confidence": 90.0,
                 "evidence": ["patents.txt: Patent PAT-US-11029302-B1", "operations_report.txt: compressor breakdowns"],
-                "reasoning": "Leverages internal edge sensors to predict physical wear prior to compressor seizure."
+                "reasoning": "Leverages internal edge diagnostics and ML code to solve recurring facilities breakdowns, saving emergency maintenance costs and preventing warehouse cargo exposures.",
+                "implementation_difficulty": "High",
+                "expected_business_impact": "Prevents catastrophic facilities shutdowns and decreases unplanned downtime by 40%",
+                "key_risks": ["High ambient warehouse acoustic noise filtering", "Edge microcontrollers hardware processing limits"],
+                "recommended_next_experiment": "Record compressor sound waveforms during normal and failing operations on one facility unit."
             })
             
         if has_logistics:
@@ -267,7 +275,7 @@ Malformed text:
                 "problem": "Static fleet routing schedule delays leading to battery backup drain and transit window failures.",
                 "solution": "Analyze historical shipping coordinates and storm alerts to optimize routing vectors.",
                 "existing_assets": ["Operations Reports (Static routing audit)", "Logistics Reports (Shipment SH-1051 Richmond delay history)"],
-                "asset_connection": "Correlates historic shipment logs with sensor coordinates to train weather-aware risk algorithms.",
+                "asset_connection": "Correlates historic shipment logs (SH-1051 weather delay, SH-1112 Route 70 construction) with sensor data coordinates to train weather-aware risk algorithms.",
                 "target_customers": ["Freight Forwarders", "Time-critical fleet operations"],
                 "revenue_model": "SaaS routing API usage and dynamic dashboard subscriptions.",
                 "market_potential": 80.0,
@@ -276,7 +284,11 @@ Malformed text:
                 "asset_reusability": 70.0,
                 "confidence": 85.0,
                 "evidence": ["logistics_report.txt: shipment delay archives", "operations_report.txt: static schedules audit"],
-                "reasoning": "Increases cargo reliability scores by avoiding forecast weather hazards dynamically."
+                "reasoning": "Increases cargo reliability scores by avoiding forecast weather hazards dynamically.",
+                "implementation_difficulty": "Low",
+                "expected_business_impact": "Reduces fuel consumption and weather-related delays by 25%",
+                "key_risks": ["Real-time meteorological API lag", "GPS coordinate inaccuracies in heavy storms"],
+                "recommended_next_experiment": "Create a pilot weather-routing algorithm and compare paths against historical Richmond delay logs."
             })
             
         if not opportunities:

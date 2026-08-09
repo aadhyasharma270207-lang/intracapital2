@@ -19,15 +19,15 @@ class TestScoring(unittest.TestCase):
         opp = {
             "name": "Opportunity Test",
             "market_potential": 90, # 27.0 contribution
-            "feasibility": 80,        # 20.0 contribution
-            "strategic_fit": 70,     # 14.0 contribution
+            "feasibility": 80,        # 16.0 contribution
+            "strategic_fit": 70,     # 17.5 contribution
             "asset_reusability": 85, # 12.75 contribution
             "confidence": 95,        # 9.5 contribution
-            # Total expected = 83.25 -> rounded to 83.3
+            # Total expected = 82.75 -> rounded to 82.8
         }
         
         scored = scoring.calculate_single_score(opp)
-        self.assertEqual(scored["overall_score"], 83.2)
+        self.assertEqual(scored["overall_score"], 82.8)
         self.assertIn("score_explanation", scored)
         self.assertIn("Contrib: 27.0", scored["score_explanation"])
 

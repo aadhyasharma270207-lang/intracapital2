@@ -34,6 +34,7 @@ def initialize():
 def get_collection():
     """
     Safely retrieves or creates the vector collection.
+    Handles out-of-sync registry state by forcing client re-initialization on failure.
     """
     global _client, _emb_fn
     if _client is None or _emb_fn is None:
@@ -42,10 +43,21 @@ def get_collection():
     if _client is None:
         raise ImportError("ChromaDB is not initialized.")
         
-    return _client.get_or_create_collection(
-        name=COLLECTION_NAME,
-        embedding_function=_emb_fn
-    )
+    try:
+        return _client.get_or_create_collection(
+            name=COLLECTION_NAME,
+            embedding_function=_emb_fn
+        )
+    except Exception as e:
+        print(f"[RAG SERVICE] Collection retrieval failed ({e}). Re-initializing client registry from disk...")
+        _client = None
+        initialize()
+        if _client is None:
+            raise e
+        return _client.get_or_create_collection(
+            name=COLLECTION_NAME,
+            embedding_function=_emb_fn
+        )
 
 def clear_index():
     """
@@ -101,16 +113,36 @@ def index_documents(chunks: list):
             metadatas.append(meta)
             ids.append(f"c_{chunk.get('filename', 'doc')}_{idx}_{uuid_hash(chunk['text'])}")
             
+        # Filter out IDs that already exist in the collection to prevent re-embedding
+        try:
+            existing_results = collection.get(ids=ids)
+            existing_ids = set(existing_results.get("ids", [])) if existing_results else set()
+        except Exception:
+            existing_ids = set()
+            
+        new_documents = []
+        new_metadatas = []
+        new_ids = []
+        for doc, meta, doc_id in zip(documents, metadatas, ids):
+            if doc_id not in existing_ids:
+                new_documents.append(doc)
+                new_metadatas.append(meta)
+                new_ids.append(doc_id)
+                
+        if not new_ids:
+            print(f"[RAG SERVICE] All {len(ids)} chunks already indexed. Skipping re-embedding.")
+            return
+            
         # Write in batches
         batch_size = 350
-        for i in range(0, len(documents), batch_size):
-            end_idx = min(i + batch_size, len(documents))
+        for i in range(0, len(new_documents), batch_size):
+            end_idx = min(i + batch_size, len(new_documents))
             collection.add(
-                documents=documents[i:end_idx],
-                metadatas=metadatas[i:end_idx],
-                ids=ids[i:end_idx]
+                documents=new_documents[i:end_idx],
+                metadatas=new_metadatas[i:end_idx],
+                ids=new_ids[i:end_idx]
             )
-        print(f"[RAG SERVICE] Indexed {len(documents)} document chunks in database.")
+        print(f"[RAG SERVICE] Indexed {len(new_documents)} new document chunks (skipped {len(ids) - len(new_ids)} duplicates) in database.")
     except Exception as e:
         print(f"[RAG SERVICE] Indexing failed: {e}")
         raise e

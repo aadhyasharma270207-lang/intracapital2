@@ -31,8 +31,8 @@ def calculate_single_score(opp: dict) -> dict:
 
     overall = (
         (m_score * 0.30) +
-        (f_score * 0.25) +
-        (s_score * 0.20) +
+        (s_score * 0.25) +
+        (f_score * 0.20) +
         (a_score * 0.15) +
         (c_score * 0.10)
     )
@@ -41,8 +41,8 @@ def calculate_single_score(opp: dict) -> dict:
     explanation = (
         f"Overall Score: {overall:.1f}/100. Breakdown:\n"
         f"- Market Potential (30%): {m_score:.1f}/100 (Contrib: {m_score * 0.30:.1f})\n"
-        f"- Feasibility (25%): {f_score:.1f}/100 (Contrib: {f_score * 0.25:.1f})\n"
-        f"- Strategic Fit (20%): {s_score:.1f}/100 (Contrib: {s_score * 0.20:.1f})\n"
+        f"- Strategic Fit (25%): {s_score:.1f}/100 (Contrib: {s_score * 0.25:.1f})\n"
+        f"- Feasibility (20%): {f_score:.1f}/100 (Contrib: {f_score * 0.20:.1f})\n"
         f"- Asset Reusability (15%): {a_score:.1f}/100 (Contrib: {a_score * 0.15:.1f})\n"
         f"- Confidence (10%): {c_score:.1f}/100 (Contrib: {c_score * 0.10:.1f})"
     )

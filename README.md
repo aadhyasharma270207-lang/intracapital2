@@ -95,19 +95,42 @@ Update `.env` with your watsonx.ai credentials. If you do not have active creden
 
 ## 🏃 Running the Application
 
+### Option A — One Click (Recommended)
+Double-click the startup script in the repository root folder:
+```bash
+run_app.bat
+```
+This will automatically launch the Backend server and the Frontend dashboard in two separate terminal windows.
+
+Once running:
+*   **Streamlit Frontend**: Open [http://127.0.0.1:8501](http://127.0.0.1:8501)
+*   **FastAPI Backend API**: Open [http://127.0.0.1:8000](http://127.0.0.1:8000)
+*   **API Documentation**: Open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+
+---
+
+### Option B — Two Terminals (Manual Start)
+
+#### Terminal 1 — Start Backend API Server
+Execute the backend batch launcher:
+```bash
+run_backend.bat
+```
+This launches FastAPI on port `8000`.
+
+#### Terminal 2 — Start Frontend Dashboard Client
+Execute the frontend batch launcher:
+```bash
+run_frontend.bat
+```
+This launches Streamlit on port `8501`.
+
+---
+
 ### Executing Automated Unit Tests
 Verify the installation by running pytest:
 ```bash
 pytest
-```
-Or with python's built-in test module:
-```bash
-python -m unittest tests/test_backend.py
-```
-
-### Running the Web App Dashboard
-```bash
-streamlit run app.py
 ```
 
 ---

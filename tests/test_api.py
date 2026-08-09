@@ -50,16 +50,16 @@ class TestApiEndpoints(unittest.TestCase):
         # Call protected endpoint without headers
         res = self.client.post("/reset")
         self.assertEqual(res.status_code, 401)
-        self.assertIn("Authorization", res.json()["detail"])
+        self.assertIn("X-API-Key", res.json()["detail"])
         
         # Call protected endpoint with bad header
-        headers = {"Authorization": "Bearer badtoken"}
+        headers = {"X-API-Key": "badtoken"}
         res = self.client.post("/reset", headers=headers)
         self.assertEqual(res.status_code, 401)
-        self.assertIn("Invalid", res.json()["detail"])
+        self.assertIn("Unauthorized", res.json()["detail"])
         
         # Call with correct header
-        headers = {"Authorization": "Bearer hackathonsecret123"}
+        headers = {"X-API-Key": "hackathonsecret123"}
         res = self.client.post("/reset", headers=headers)
         self.assertEqual(res.status_code, 200)
 
@@ -70,7 +70,7 @@ class TestApiEndpoints(unittest.TestCase):
         # Load demo opportunities into manager
         headers = {}
         if config.FASTAPI_INTERNAL_API_KEY:
-            headers["Authorization"] = f"Bearer {config.FASTAPI_INTERNAL_API_KEY}"
+            headers["X-API-Key"] = config.FASTAPI_INTERNAL_API_KEY
             
         self.client.get("/opportunities", headers=headers)
         

@@ -20,11 +20,15 @@ class TestRagService(unittest.TestCase):
         self.orig_store = config.VECTORSTORE_DIR
         self.test_dir = Path(tempfile.mkdtemp())
         config.VECTORSTORE_DIR = self.test_dir
+        # Force client re-initialization on the temporary directory
+        rag_service.clear_index()
+        rag_service._client = None
         
     def tearDown(self):
-        # Reset configuration
+        # Reset configuration and close database references to prevent locking
         config.VECTORSTORE_DIR = self.orig_store
         rag_service.clear_index()
+        rag_service._client = None
         shutil.rmtree(self.test_dir, ignore_errors=True)
 
     def test_indexing_and_semantic_retrieval(self):

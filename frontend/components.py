@@ -2,6 +2,7 @@ import streamlit as st
 import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
+import textwrap
 
 def render_header():
     """
@@ -265,63 +266,63 @@ def render_executive_dashboard(stats: dict, is_live: bool):
     
     with col1:
         st.markdown(
-            f"""
+            textwrap.dedent(f"""
             <div class="metric-container">
                 <div style="font-size: 1.6rem; margin-bottom: 6px;">📁</div>
                 <div class="metric-value">{stats.get('documents_processed', 0)}</div>
                 <div class="metric-label">Assets Analyzed</div>
             </div>
-            """,
+            """),
             unsafe_allow_html=True
         )
     with col2:
         st.markdown(
-            f"""
+            textwrap.dedent(f"""
             <div class="metric-container">
                 <div style="font-size: 1.6rem; margin-bottom: 6px;">🧩</div>
                 <div class="metric-value">{stats.get('chunks', 0)}</div>
                 <div class="metric-label">Knowledge Chunks</div>
             </div>
-            """,
+            """),
             unsafe_allow_html=True
         )
     with col3:
         st.markdown(
-            f"""
+            textwrap.dedent(f"""
             <div class="metric-container">
                 <div style="font-size: 1.6rem; margin-bottom: 6px;">🔮</div>
                 <div class="metric-value">{stats.get('opportunities', 0)}</div>
                 <div class="metric-label">Opps Surfaced</div>
             </div>
-            """,
+            """),
             unsafe_allow_html=True
         )
     with col4:
         st.markdown(
-            f"""
+            textwrap.dedent(f"""
             <div class="metric-container">
                 <div style="font-size: 1.6rem; margin-bottom: 6px;">🧠</div>
                 <div class="metric-value">{stats.get('average_confidence', 0.0):.1f}%</div>
                 <div class="metric-label">Avg Confidence</div>
             </div>
-            """,
+            """),
             unsafe_allow_html=True
         )
     with col5:
         st.markdown(
-            f"""
+            textwrap.dedent(f"""
             <div class="metric-container" style="border-color: rgba(16, 185, 129, 0.25) !important;">
                 <div style="font-size: 1.6rem; margin-bottom: 6px;">🏆</div>
                 <div class="metric-value" style="background: linear-gradient(135deg, #10b981 0%, #34d399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{stats.get('top_score', 0.0):.1f}%</div>
                 <div class="metric-label">Top Score</div>
             </div>
-            """,
+            """),
             unsafe_allow_html=True
         )
 
-def render_opportunity_card(opp: dict, rank: int, is_top: bool = False):
+def get_opportunity_card_html(opp: dict, rank: int, is_top: bool = False) -> str:
     """
-    Renders opportunities inside premium floating cards with SVG score progress rings.
+    Returns the HTML representation of an opportunity card.
     """
     score = opp.get("overall_score", 0.0)
     container_class = "top-opp-container" if is_top else "opp-card"
@@ -342,37 +343,36 @@ def render_opportunity_card(opp: dict, rank: int, is_top: bool = False):
     </svg>
     """
     
-    st.markdown(
-        f"""
-        <div class="{container_class}">
-            {label_html}
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 12px;">
-                <h2 style="margin: 0; font-size: 1.7rem; color: #ffffff; line-height: 1.25;">{opp.get('name', 'Unnamed Venture')}</h2>
-                {progress_svg}
-            </div>
-            
-            <p style="font-size: 1.12rem; font-style: italic; color: #cbd5e1; margin-bottom: 20px; line-height: 1.45; font-weight: 300;">
-                "{opp.get('pitch', '')}"
-            </p>
-            
-            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px;">
-                <span class="opp-score-pill">📈 Market Potential: {opp.get('market_potential', 0):.0f}%</span>
-                <span class="opp-score-pill">🛠️ Feasibility: {opp.get('feasibility', 0):.0f}%</span>
-                <span class="opp-score-pill">🛡️ Strategic Fit: {opp.get('strategic_fit', 0):.0f}%</span>
-                <span class="opp-score-pill">♻️ Asset Reuse: {opp.get('asset_reusability', 0):.0f}%</span>
-                <span class="opp-score-pill">🧠 Confidence: {opp.get('confidence', 0):.0f}%</span>
-            </div>
-            
-            <div style="font-size: 0.95rem; line-height: 1.5; color: #94a3b8;">
-                <strong style="color: #f1f5f9;">Identified Pain Point:</strong>
-                <p style="margin-top: 4px; margin-bottom: 12px; color: #cbd5e1;">{opp.get('problem', '')}</p>
-                <strong style="color: #f1f5f9;">Proprietary Venture Solution:</strong>
-                <p style="margin-top: 4px; margin-bottom: 0; color: #cbd5e1;">{opp.get('solution', '')}</p>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    return f"""<div class="{container_class}">
+{label_html}
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 12px;">
+<h2 style="margin: 0; font-size: 1.7rem; color: #ffffff; line-height: 1.25; font-family: 'Outfit', sans-serif; font-weight: 700;">{opp.get('name', 'Unnamed Venture')}</h2>
+{progress_svg}
+</div>
+<p style="font-size: 1.05rem; font-style: italic; color: #cbd5e1; margin-bottom: 20px; line-height: 1.45; font-weight: 300; font-family: 'Inter', sans-serif;">
+"{opp.get('pitch', '')}"
+</p>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px;">
+<span class="opp-score-pill">📈 Market Potential: {opp.get('market_potential', 0):.0f}%</span>
+<span class="opp-score-pill">🛠️ Feasibility: {opp.get('feasibility', 0):.0f}%</span>
+<span class="opp-score-pill">🛡️ Strategic Fit: {opp.get('strategic_fit', 0):.0f}%</span>
+<span class="opp-score-pill">♻️ Asset Reuse: {opp.get('asset_reusability', 0):.0f}%</span>
+<span class="opp-score-pill">🧠 Confidence: {opp.get('confidence', 0):.0f}%</span>
+</div>
+<div style="font-size: 0.95rem; line-height: 1.5; color: #94a3b8; font-family: 'Inter', sans-serif;">
+<strong style="color: #f1f5f9;">Identified Pain Point:</strong>
+<p style="margin-top: 4px; margin-bottom: 12px; color: #cbd5e1;">{opp.get('problem', '')}</p>
+<strong style="color: #f1f5f9;">Proprietary Venture Solution:</strong>
+<p style="margin-top: 4px; margin-bottom: 0; color: #cbd5e1;">{opp.get('solution', '')}</p>
+</div>
+</div>"""
+
+def render_opportunity_card(opp: dict, rank: int, is_top: bool = False):
+    """
+    Renders opportunities inside premium floating cards with SVG score progress rings.
+    """
+    card_html = get_opportunity_card_html(opp, rank, is_top)
+    st.markdown(card_html, unsafe_allow_html=True)
 
 def render_opportunity_network(opp: dict):
     """

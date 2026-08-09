@@ -33,7 +33,11 @@ DEMO_OPPORTUNITIES = [
             "research_report.txt: Document RD-2025-99 thermal stress integrals",
             "customer_feedback.txt: Log CF-2026-042 insulin $85,000 loss"
         ],
-        "reasoning": "Direct match between active customer financial write-offs and patented, researched corporate assets that can be productized immediately."
+        "reasoning": "Direct match between active customer financial write-offs and patented, researched corporate assets that can be productized immediately.",
+        "implementation_difficulty": "Medium",
+        "expected_business_impact": "High cost savings by reducing cold chain write-offs by 90%",
+        "key_risks": ["Radio signal attenuation through dense cargo boxes", "Calibrating temperature sensors across extreme ranges"],
+        "recommended_next_experiment": "Deploy 5 mesh beacons in a pilot run containing organic strawberries over a 15-mile transit."
     },
     {
         "id": "opp_pred_maint_2",
@@ -62,7 +66,11 @@ DEMO_OPPORTUNITIES = [
             "research_report.txt: Document RD-2025-102 ML compressor wear prediction",
             "operations_report.txt: Facilities status Comp-A seized July 14"
         ],
-        "reasoning": "Leverages internal edge diagnostics and ML code to solve recurring facilities breakdowns, saving emergency maintenance costs and preventing warehouse cargo exposures."
+        "reasoning": "Leverages internal edge diagnostics and ML code to solve recurring facilities breakdowns, saving emergency maintenance costs and preventing warehouse cargo exposures.",
+        "implementation_difficulty": "High",
+        "expected_business_impact": "Prevents catastrophic facilities shutdowns and decreases unplanned downtime by 40%",
+        "key_risks": ["High ambient warehouse acoustic noise filtering", "Edge microcontrollers hardware processing limits"],
+        "recommended_next_experiment": "Record compressor sound waveforms during normal and failing operations on one facility unit."
     },
     {
         "id": "opp_log_risk_3",
@@ -90,7 +98,11 @@ DEMO_OPPORTUNITIES = [
             "logistics_report.txt: Shipment SH-1051 delayed 18 hours near Richmond storm",
             "operations_report.txt: static schedule bottlenecks and battery strain logs"
         ],
-        "reasoning": "Improves route reliability scores by applying historical delay analytics to dynamic scheduling, preventing cargo container battery backup depletion."
+        "reasoning": "Improves route reliability scores by applying historical delay analytics to dynamic scheduling, preventing cargo container battery backup depletion.",
+        "implementation_difficulty": "Low",
+        "expected_business_impact": "Reduces fuel consumption and weather-related delays by 25%",
+        "key_risks": ["Real-time meteorological API lag", "GPS coordinate inaccuracies in heavy storms"],
+        "recommended_next_experiment": "Create a pilot weather-routing algorithm and compare paths against historical Richmond delay logs."
     }
 ]
 
@@ -230,7 +242,7 @@ Corporate Evidence:
 
 Return a JSON array under the key "opportunities". Each opportunity must contain these exact fields:
 - name: string (Venture name)
-- pitch: string (One-line pitch)
+- pitch: string (One-line pitch / business thesis)
 - problem: string (Grounded in customer complaints or operational failures from evidence)
 - solution: string (How we solve it using our technology assets)
 - existing_assets: array of strings (Specific patent titles or research report refs referenced in evidence)
@@ -244,6 +256,10 @@ Return a JSON array under the key "opportunities". Each opportunity must contain
 - confidence: number (0-100 score)
 - reasoning: string (Concise explanation of the commercial opportunity)
 - evidence: array of strings (Direct references to sources in evidence, e.g. "customer_feedback.txt log CF-2026-001 and patents.txt Patent PAT-US-10492811-B2")
+- implementation_difficulty: string (either "High", "Medium", or "Low")
+- expected_business_impact: string (commercial impact description)
+- key_risks: array of strings (primary operational/business risks)
+- recommended_next_experiment: string (first validation experiment to run)
 
 Ensure all names and descriptions correspond strictly to the evidence. Do not invent any patents or assets not explicitly listed in the evidence.
 
@@ -265,7 +281,11 @@ JSON Schema format:
        "asset_reusability": 70,
        "confidence": 85,
        "reasoning": "...",
-       "evidence": ["..."]
+       "evidence": ["..."],
+       "implementation_difficulty": "Medium",
+       "expected_business_impact": "...",
+       "key_risks": ["..."],
+       "recommended_next_experiment": "..."
      }}
   ]
 }}
@@ -279,7 +299,12 @@ JSON Schema format:
             validated_list = []
             for opp in opp_list:
                 # 1. Required keys check
-                required_keys = ["name", "pitch", "problem", "solution", "existing_assets", "asset_connection", "target_customers", "revenue_model", "market_potential", "feasibility", "strategic_fit", "asset_reusability", "confidence", "reasoning", "evidence"]
+                required_keys = [
+                    "name", "pitch", "problem", "solution", "existing_assets", "asset_connection", 
+                    "target_customers", "revenue_model", "market_potential", "feasibility", "strategic_fit", 
+                    "asset_reusability", "confidence", "reasoning", "evidence", "implementation_difficulty", 
+                    "expected_business_impact", "key_risks", "recommended_next_experiment"
+                ]
                 if not all(k in opp for k in required_keys):
                     continue
                     

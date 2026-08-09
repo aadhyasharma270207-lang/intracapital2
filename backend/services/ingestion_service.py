@@ -164,27 +164,53 @@ def process_csv(file_path: Path) -> list:
         
     return chunks
 
+INGESTION_CACHE = {}
+
+def get_file_hash(file_path: Path) -> str:
+    """
+    Computes SHA-256 hash of a file.
+    """
+    import hashlib
+    hasher = hashlib.sha256()
+    with open(file_path, 'rb') as f:
+        buf = f.read(65536)
+        while len(buf) > 0:
+            hasher.update(buf)
+            buf = f.read(65536)
+    return hasher.hexdigest()
+
 def ingest_file(file_path: Path) -> list:
     """
     Routes files to their respective extractors. Tolerates errors for single corrupt files.
+    Caches results using SHA-256 file hashes to prevent duplicate preprocessing.
     """
     file_path = Path(file_path)
     if not file_path.exists():
         return []
         
+    try:
+        f_hash = get_file_hash(file_path)
+        if f_hash in INGESTION_CACHE:
+            print(f"[INGESTION] Cache hit for {file_path.name} ({f_hash[:8]}). Reusing chunks.")
+            return INGESTION_CACHE[f_hash]
+    except Exception as e:
+        print(f"[INGESTION] Hashing failed for {file_path.name}: {e}")
+        f_hash = None
+        
     ext = file_path.suffix.lower()
+    chunks = []
     try:
         if ext == ".txt":
-            return process_txt(file_path)
+            chunks = process_txt(file_path)
         elif ext == ".pdf":
-            return process_pdf(file_path)
+            chunks = process_pdf(file_path)
         elif ext == ".csv":
-            return process_csv(file_path)
+            chunks = process_csv(file_path)
         else:
-            return []
+            chunks = []
     except Exception as e:
         print(f"[INGESTION] Error processing {file_path.name}: {e}")
-        return [{
+        chunks = [{
             "text": f"Error loading file {file_path.name}. Details: {str(e)}",
             "source": file_path.name,
             "filename": file_path.name,
@@ -193,6 +219,11 @@ def ingest_file(file_path: Path) -> list:
             "chunk_id": str(uuid.uuid4()),
             "metadata": {"source": file_path.name, "filename": file_path.name, "file_type": ext.replace(".", ""), "error": str(e)}
         }]
+        
+    if chunks and f_hash:
+        INGESTION_CACHE[f_hash] = chunks
+        
+    return chunks
 
 def ingest_directory(directory_path: Path) -> list:
     """
