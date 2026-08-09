@@ -1,0 +1,37 @@
+=========================================
+INTRACAPITAL SAMPLE COMPANY: CUSTOMER FEEDBACK & SUPPORT LOGS
+=========================================
+
+Log ID: CF-2026-001
+Date: 2026-06-12
+Customer: FreshFoods Distribution
+Issue: Spoilage of Organic Berries (Shipment ID: SH-1082)
+Detail: 
+Customer reports that the last two shipments of organic strawberries (Shipment ID: SH-1082 and SH-1095) arrived with significant spoilage and mold. The shelf-life was reduced by 60%, leading to an estimated write-off of $14,000. Customer demands verification of transit temperatures. Our aggregate temperature log from the truck dashboard showed a steady 4°C, but customer claims pallet-level microclimates must have spiked. They threaten to terminate the contract if this happens again.
+
+-----------------------------------------
+
+Log ID: CF-2026-042
+Date: 2026-07-02
+Customer: PharmaGuard Solutions
+Issue: Thermal Excursions in Biologics Cargo (Shipment ID: SH-1104)
+Detail: 
+Received delivery of insulin vials (Shipment ID: SH-1104) at our distribution center. The internal chemical indicators on 3 out of 10 pallets flagged a cumulative temperature exposure above 8°C for at least 4 hours. Under regulatory guidelines, the entire batch of 12,000 vials has been quarantined and will likely be destroyed, resulting in a loss of over $85,000. We need pallet-level verification to isolate the issue. Aggregate container sensors did not flag this temperature spike.
+
+-----------------------------------------
+
+Log ID: CF-2026-089
+Date: 2026-07-15
+Customer: Apex Warehousing
+Issue: Delivery Timelines and Inventory Shortages
+Detail: 
+We are seeing massive disruptions in shipping arrival windows. Shipments SH-1051 and SH-1066 arrived 18 hours and 22 hours behind schedule, respectively. This delay caused an inventory stockout of our high-demand frozen goods, impacting our downstream service level agreement (SLA) scores. We need route predictability and risk assessments to manage our storage buffers.
+
+-----------------------------------------
+
+Log ID: CF-2026-112
+Date: 2026-07-28
+Customer: Gourmet Express
+Issue: Seafood Cargo Degraded Quality (Shipment ID: SH-1112)
+Detail: 
+Shipment SH-1112 (Premium Alaskan Salmon) arrived smelling strongly of fish oil, indicating premature lipid oxidation, which only occurs if temperatures exceed 0°C during transport. The shipping logs claim the container was kept at -18°C throughout, but the seafood quality has clearly degraded. We need granular telemetry to identify where along the shipping route the cooling failed.

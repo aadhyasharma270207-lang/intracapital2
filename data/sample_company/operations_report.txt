@@ -1,0 +1,17 @@
+=========================================
+INTRACAPITAL SAMPLE COMPANY: OPERATIONS & FACILITIES REPORT
+=========================================
+Reporting Period: July - August 2026
+Department: Maintenance & Facilities
+
+1. FACILITIES STATUS & COMPRESSOR ANOMALIES
+A review of warehouse and terminal HVAC facilities highlights several mechanical warning signs:
+- Warehouse WH-101 (Primary Cold Storage): The main cooling compressor unit (Comp-A) exhibited severe housing temperature spikes, reaching a peak of 85°C on July 13 (normal operating range: 50-60°C). Facilities staff noted a strong vibration sound from the compressor shaft. Without vibration sensors, we could not diagnose the specific frequency. The unit seized completely on July 14, leading to a 6-hour power-down of Zone 3 cooling and a subsequent temperature spike that impacted several perishable pallets.
+- Warehouse WH-102 (Regional Distribution Hub): The backup compressor (Comp-B) is showing mild bearing wear. Operational winding temperatures fluctuate between 62°C and 78°C during peak loading.
+- Transit Container C-801: Compressor unit Ref-B2 requires manual bearing replacements and a secondary loop recharge. The unit has been flag-listed due to periodic cooling failures during transits.
+
+2. DISPATCH & DYNAMIC ROUTING EFFICIENCY
+Current logistics dispatch systems rely on static scheduling. Drivers are assigned routes regardless of real-time weather forecasts or port congestion reports. The lack of dynamic routing leads to regular idle time where refrigerated containers run on battery backups in high-heat yards, increasing battery strain and cargo risk.
+- Shipment SH-1051 was stationary for 12 hours at Richmond Terminal during storm flooding.
+- Shipment SH-1066 was held at Port Newark container yard for 22 hours under 32°C ambient temperatures.
+- Shipment SH-1112 was detoured onto Route 70 for 6 hours due to unplanned road construction.

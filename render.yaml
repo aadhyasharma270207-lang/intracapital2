@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: intracapital-backend
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.api:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: FASTAPI_INTERNAL_API_KEY
+        generateValue: true
+      - key: WATSONX_APIKEY
+        sync: false
+      - key: WATSONX_PROJECT_ID
+        sync: false
+      - key: HF_TOKEN
+        sync: false
