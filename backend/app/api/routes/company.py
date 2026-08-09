@@ -4,6 +4,8 @@ from app.schemas.schemas import CompanyResponse, CompanyCreate
 from app.db.repositories.repos import CompanyRepository
 from app.db.sqlite import get_db
 
+from app.models.models import Company
+
 router = APIRouter()
 
 @router.post("/company", response_model=CompanyResponse, tags=["Company"])
@@ -12,6 +14,9 @@ def create_company(company: CompanyCreate, db: Session = Depends(get_db)):
     Creates a new company workspace registry.
     """
     try:
+        existing = db.query(Company).filter(Company.name == company.name).first()
+        if existing:
+            return existing
         new_company = CompanyRepository.create(db, company.name, company.description)
         return new_company
     except Exception as e:
