@@ -1,16 +1,26 @@
 services:
+  # 1. FastAPI Backend API Gateway
   - type: web
     name: intracapital-backend
     env: python
     plan: free
+    rootDir: backend
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn backend.api:app --host 0.0.0.0 --port $PORT
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
-      - key: FASTAPI_INTERNAL_API_KEY
-        generateValue: true
-      - key: WATSONX_APIKEY
-        sync: false
-      - key: WATSONX_PROJECT_ID
-        sync: false
-      - key: HF_TOKEN
-        sync: false
+      - key: PROJECT_ENV
+        value: production
+      - key: DATABASE_URL
+        value: sqlite:///./intracapital.db
+
+  # 2. Vite React Frontend Dashboard
+  - type: web
+    name: intracapital-frontend
+    env: static
+    plan: free
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    publishPath: dist
+    headers:
+      - key: Cache-Control
+        value: no-cache
