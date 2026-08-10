@@ -39,11 +39,9 @@ app = FastAPI(
 
 # Configure CORS
 # Ensure FRONTEND_URL is loaded without wildcard fallback in production
-origins = []
-if settings.FRONTEND_URL:
+origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+if settings.FRONTEND_URL and settings.FRONTEND_URL not in origins:
     origins.append(settings.FRONTEND_URL)
-else:
-    origins.append("http://localhost:5173")
 
 app.add_middleware(
     CORSMiddleware,
