@@ -1,4 +1,5 @@
 import os
+os.environ["DATABASE_URL"] = "sqlite:///./test_intracapital.db"
 import sys
 from pathlib import Path
 import pytest
